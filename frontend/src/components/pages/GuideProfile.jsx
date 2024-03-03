@@ -8,55 +8,60 @@ import { toast } from "react-toastify";
 import NavbarComponent from "../ui/NavbarComponent";
 import SidebarComponent from "../ui/SidebarComponent";
 
-
 export default function GuideProfile() {
   const { id } = useParams();
-  const [hasName, setHasName] = useState("");
+  const [hasName, setHasName] = useState(false);
   const [showBtn, setShowBtn] = useState(false);
-
   const [date, setDate] = useState("");
 
-  const getProfile = async () => {
-    const res = await fetch("http://localhost:8080/user",{
-      method:"GET",
-      credentials: "include"
-    })
-    return await res.json();
-  }
+  // Get tomorrow's date in YYYY-MM-DD format for min date restriction
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
 
+  const getProfile = async () => {
+    const res = await fetch("http://localhost:8080/user", {
+      method: "GET",
+      credentials: "include"
+    });
+    return await res.json();
+  };
 
   const profileData = useQuery({
-    queryKey:["fetchProfile"], 
+    queryKey: ["fetchProfile"],
     queryFn: getProfile
-  })
-  
-  useEffect(() => {
-    if(profileData.data){
-      setHasName(profileData.data.data.user_name)
-    }
-    if(hasName !== ""){
-      setShowBtn(true)
-    }
-  }, [profileData.data, hasName])
+  });
 
+  useEffect(() => {
+    // Check if user has a name and is a USER
+    if (profileData.data?.data) {
+      const userData = profileData.data.data;
+      setHasName(!!userData.user_name); // Convert to boolean
+      setShowBtn(!!userData.user_name && userData.user_role === "USER");
+    }
+  }, [profileData.data]);
 
   const onChange = (e) => {
     setDate(e.target.value);
-  }
+  };
 
   const addBooking = async () => {
-    const res = await fetch(`http://localhost:8080/booking/${id}`, {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify({ booking_date: date }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data =  await res.json();
-    setDate("");
-    toast(data.message);
-  }
+    try {
+      const res = await fetch(`http://localhost:8080/booking/${id}`, {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ booking_date: date }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      setDate("");
+      toast(data.message);
+    } catch (error) {
+      toast.error("Failed to create booking. Please try again.");
+    }
+  };
 
   const getGuideProfile = async () => {
     const res = await fetch(`http://localhost:8080/user/${id}`, {
@@ -70,6 +75,7 @@ export default function GuideProfile() {
     queryKey: ["fetchGuideProfile"],
     queryFn: getGuideProfile,
   });
+
   return (
     <>
       <div className="h-screen w-screen overflow-hidden flex flex-col">
@@ -83,7 +89,6 @@ export default function GuideProfile() {
                 <div className="flex flex-col items-center mb-8">
                   <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
                     <img
-                      // src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces&auto=format&q=80"
                       src={`http://localhost:8080/${data?.data?.user_profile}`}
                       alt="Profile"
                       className="w-full h-full object-cover"
@@ -212,26 +217,38 @@ export default function GuideProfile() {
                     </div>
                   </div>
                   
-                  {!showBtn && data?.data?.user_role === "GUIDE" && (
+                  {/* Message for users without a complete profile */}
+                  {!hasName && profileData?.data?.data?.user_role === "USER" && (
                     <div className="col-span-full mt-4">
                       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                        <p className="text-yellow-700">You need to complete your profile before booking a guide.</p>
+                        <p className="text-yellow-700">Please complete your profile before booking a guide.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Message for guides trying to book */}
+                  {profileData?.data?.data?.user_role === "GUIDE" && (
+                    <div className="col-span-full mt-4">
+                      <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
+                        <p className="text-orange-700">You cannot make bookings while working as a guide.</p>
                       </div>
                     </div>
                   )}
                   
-                  {showBtn && data?.data?.user_role === "GUIDE" && (
+                  {/* Booking section for valid users */}
+                  {showBtn && (
                     <div className="col-span-full flex gap-10">
                       <input
                         type="date"
                         name="booking_date"
                         onChange={onChange}
                         value={date}
+                        min={minDate}
                         className="w-full flex justify-center items-center px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                       <button
-                        disabled={date !== "" ? false : true}
-                        onClick={() => addBooking()}
+                        disabled={!date}
+                        onClick={addBooking}
                         className="w-full px-3 py-2 disabled:bg-purple-900 border rounded-md bg-purple-500 hover:bg-purple-700 hover:cursor-pointer text-white"
                       > 
                         Book Now
@@ -241,7 +258,6 @@ export default function GuideProfile() {
                 </div>
               </div>
             </div>
-            
           </div>
         </div>
       </div>

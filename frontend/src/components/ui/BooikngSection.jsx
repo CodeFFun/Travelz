@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export default function BookingSection() {
   const navigate = useNavigate();
@@ -32,21 +33,18 @@ export default function BookingSection() {
     });
     return await res.json();
   };
-
+  
   const role = useQuery({
     queryKey: ["fetchRole"],
     queryFn: getRole,
   });
-
-  const checkRole = (role) => {
-    if (role === "GUIDE") {
+  
+  useEffect(() => {
+    if (role.data?.data?.role === "GUIDE") {
       setIsGuide(true);
     }
-  };
+  }, [role.data]); // Dependency array ensures this runs only when role.data changes
   
-  if (role.data?.data?.role) {
-    checkRole(role.data.data.role);
-  }
 
   return (
     <>
