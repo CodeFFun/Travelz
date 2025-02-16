@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  user_id        String   @id @default(uuid())
+  user_email     String   @unique
+  user_name      String?
+  user_password  String
+  user_profile   String?
+  user_role      Role?     
+  guide          guide?
+  bookings        booking[]
+  review         review[]
+  diary          diary[]
+}
+
+model guide{
+  user_id        String   @id
+  user           user     @relation(fields: [user_id], references: [user_id])
+  language       String[]
+  hourly_rate    Int
+  bio            String
+  location       String
+  address        String
+  rating         Float
+  reviews        review[]
+  bookings       booking[]
+  
+}
+
+model booking{
+  booking_id     String   @id @default(uuid())
+  booking_date   String
+  user_id        String
+  user           user     @relation(fields: [user_id], references: [user_id])
+  guide_id       String
+  guide          guide    @relation(fields: [guide_id], references: [user_id])
+  start_time     String
+  end_time       String
+  status         Status    @default(PENDING)
+}
+
+model diary{
+  diary_id      String   @id @default(uuid())
+  user_id       String
+  user          user     @relation(fields: [user_id], references: [user_id])
+  diary_title  String
+  diary_desc   String
+  diary_date   String
+  diary_image  String[]
+  diary_mood   String
+  diary_weather Weather
+  diary_tags   String[]
+}
+
+model review{
+  review_id     String   @id @default(uuid())
+  review_date   String
+  review_desc   String
+  review_rating Float
+  user_id       String
+  user          user     @relation(fields: [user_id], references: [user_id])
+  guide_id      String
+  guide         guide    @relation(fields: [guide_id], references: [user_id])
+}
+
+enum Weather{
+  SUNNY
+  CLOUDY
+  RAINY
+  SNOWY
+  FOGGY
+  STORMY
+}
+
+enum Status{
+  PENDING
+  COMPLETED
+  ONGOING
+}
+
+
+enum Role {
+  USER
+  ADMIN
+  GUIDE
+}
+
+model destination{
+  destination_id  String   @id @default(uuid())
+  destination_name String
+  destination_description String
+  destination_image String
+  destination_location String 
+}
+
