@@ -32,8 +32,51 @@ class userController{
         }
     }
 
+
+    getUserByRole = async (req, res) => {
+        const {role} = req.params;
+        if(!role){
+            return res.json(dataResponse(null, 'Not enough credentials', 400));
+        }
+        try{
+            //get the user from the database
+            let newUser = await user.findMany({
+                where: {
+                    user_role: role.toUpperCase(),
+                }
+            })
+            if(!newUser){
+                return res.json(dataResponse(null, 'User not found', 404));
+            }
+            res.json(dataResponse(newUser, 'User fetched successfully', 200));
+        } catch(e){
+            res.json(dataResponse(null, e.message, 500));
+        }
+    }
+
     getUserById = async (req, res) => {
         const {id} = req.params;
+        if(!id){
+            return res.json(dataResponse(null, 'Not enough credentials', 400));
+        }
+        try{
+            //get the user from the database
+            let newUser = await user.findUnique({
+                where: {
+                    user_id: id
+                }
+            })
+            if(!newUser){
+                return res.json(dataResponse(null, 'User not found', 404));
+            }
+            res.json(dataResponse(newUser, 'User fetched successfully', 200));
+        } catch(e){
+            res.json(dataResponse(null, e.message, 500));
+        }
+    }
+
+    getUserProfile = async (req, res) => {
+        const {id} = res.locals;
         if(!id){
             return res.json(dataResponse(null, 'Not enough credentials', 400));
         }
@@ -75,27 +118,32 @@ class userController{
         }
     }
 
-    updateUser = (req, res) => {
-        const {id} = req.params;
-        if(!id){
-           return res.json(dataResponse(null, 'Not enough credentials', 400));
+    updateUser = async (req, res) => {
+        const { id } = res.locals;
+        let {user_rate} = req.body;
+
+        if(user_rate){
+            user_rate = Number(user_rate);
         }
-        try{
-            //update the user in the database
-            const newUser = user.update({
-                where: {
-                    user_id: id
-                },
-                data: req.body
-            })
-            if(!newUser){
-                res.json(dataResponse(null, 'User not found', 404));
-            }
+        if (!id) {
+            return res.json(dataResponse(null, 'Not enough credentials', 400));
+        }
+    
+        try {
+            const newUser = await user.update({
+                where: { user_id: id },  // Make sure 'user_id' is the correct field name
+                data: {...req.body, user_rate}
+            });
+    
             res.json(dataResponse(newUser, 'User updated successfully', 200));
-        } catch(e){
+        } catch (e) {
+            if (e.code === 'P2025') {  // Prisma-specific error for "Record not found"
+                return res.json(dataResponse(null, 'User not found', 404));
+            }
             res.json(dataResponse(null, e.message, 500));
         }
-    }
+    };
+    
 
     deleteUser = async (req, res) => {
         const {id} = req.params;

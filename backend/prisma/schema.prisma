@@ -14,67 +14,60 @@ datasource db {
 }
 
 model user {
-  user_id        String   @id @default(uuid())
-  user_email     String   @unique
-  user_name      String?
-  user_password  String
-  user_profile   String?
-  user_role      Role?     
-  guide          guide?
-  bookings        booking[]
-  review         review[]
-  diary          diary[]
+  user_id          String   @id @default(uuid())
+  user_email       String   @unique
+  user_name        String?
+  user_phone       String?
+  user_address     String?
+  user_language    String?
+  user_rating      Float?
+  user_tourlocation String?
+  user_rate        Int?
+  user_password    String
+  user_profile     String @default("/default.png")
+  user_role        Role     
+  bookingsAsUser   booking[] @relation("UserBookings")
+  bookingsAsGuide  booking[] @relation("GuideBookings")
+  reviewsAsUser    review[]  @relation("UserReviews")  // Reviews given by user
+  reviewsAsGuide   review[]  @relation("GuideReviews") // Reviews received by guide
+  diary            diary[]
 }
 
-model guide{
-  user_id        String   @id
-  user           user     @relation(fields: [user_id], references: [user_id])
-  language       String[]
-  hourly_rate    Int
-  bio            String
-  location       String
-  address        String
-  rating         Float
-  reviews        review[]
-  bookings       booking[]
-  
-}
 
-model booking{
-  booking_id     String   @id @default(uuid())
-  booking_date   String
-  user_id        String
-  user           user     @relation(fields: [user_id], references: [user_id])
-  guide_id       String
-  guide          guide    @relation(fields: [guide_id], references: [user_id])
-  start_time     String
-  end_time       String
-  status         Status    @default(PENDING)
+model booking {
+  booking_id   String   @id @default(uuid())
+  booking_date String
+  user_id      String
+  user         user     @relation("UserBookings", fields: [user_id], references: [user_id])
+  guide_id     String
+  guide        user     @relation("GuideBookings", fields: [guide_id], references: [user_id])
+  status       Status   @default(PENDING)
 }
 
 model diary{
   diary_id      String   @id @default(uuid())
   user_id       String
   user          user     @relation(fields: [user_id], references: [user_id])
-  diary_title  String
-  diary_desc   String
-  diary_date   String
-  diary_image  String[]
-  diary_mood   String
-  diary_weather Weather
-  diary_tags   String[]
+  diary_title  String?
+  diary_desc   String?
+  diary_date   String?
+  diary_image  String?
+  diary_mood   String?
+  diary_weather Weather?
+  diary_tags   String[] @default([])
 }
 
-model review{
+model review {
   review_id     String   @id @default(uuid())
-  review_date   String
+  review_date   String?
   review_desc   String
   review_rating Float
   user_id       String
-  user          user     @relation(fields: [user_id], references: [user_id])
+  user          user     @relation("UserReviews", fields: [user_id], references: [user_id])
   guide_id      String
-  guide         guide    @relation(fields: [guide_id], references: [user_id])
+  guide         user     @relation("GuideReviews", fields: [guide_id], references: [user_id])
 }
+
 
 enum Weather{
   SUNNY
@@ -98,11 +91,5 @@ enum Role {
   GUIDE
 }
 
-model destination{
-  destination_id  String   @id @default(uuid())
-  destination_name String
-  destination_description String
-  destination_image String
-  destination_location String 
-}
+
 

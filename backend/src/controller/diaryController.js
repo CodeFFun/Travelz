@@ -1,45 +1,35 @@
-const {review} = require('../lib/client.js');
+const {diary} = require('../lib/client.js');
 
-class reviewController{
-    async getAllReview(req, res){
-        const { guideId } = req.params
-        if(!guideId){
+class diaryController{
+    async getAllDiary(req, res){
+        const { userId } = res.locals
+        if(!userId){
             res.json(dataResponse(null, null, 500));
         }
         try {
-            let tempReview = await review.findMany({
+            let tempDiary = await diary.findMany({
                 where: {
-                    guide_id: guideId
+                    user_id: userId
                 }
             })
             if(!newUser){
                 res.json(dataResponse(null, 'No review for this user exists', 404));
             }
-            res.json(dataResponse(tempReview, null, 200));
+            res.json(dataResponse(tempDiary, null, 200));
         } catch (error) {
             res.json(dataResponse(null, "Something went wrong", 500));
         }
 
     }
 
-    async createReview(req, res){
-        const {guideId} = req.params;
-        const {rating, comment} = req.body;
+    async createDiary(req, res){
         const {userId} = res.locals;
-        if(!guideId || !userId){
+        if(!userId){
             return res.json(dataResponse(null, "Invalid Request", 404));
         }
-        if(!userId || !rating || !comment){
-            return res.json(dataResponse(null, "All field are required", 403));
-        }
         try {
-             await review.create({
-                data: {
-                    user_id: userId,
-                    guide_id: eventId,
-                    review_rating: rating,
-                    review_content: comment
-                },
+             await diary.create({
+                data: req.body,
                 where: {
                     guide_id: guideId
                 }
@@ -51,17 +41,17 @@ class reviewController{
 
     }
 
-    async updateReview(req, res){
-        const {reviewId} = req.params;
+    async updateDiary(req, res){
+        const {diaryId} = req.params;
         const {userId} = res.locals;
         if(!reviewId || !userId){
             return res.json(dataResponse(null, null, 403));
         }
         try {
-            await review.update({
+            await diary.update({
                 data: req.body,
                 where: {
-                    review_id: reviewId,
+                    diary_id: diaryId,
                     user_id: userId
                 }
             })
@@ -71,16 +61,16 @@ class reviewController{
         }
     }
 
-    async deleteReview(req, res){
-        const {reviewId} = req.params;
+    async deleteDiary(req, res){
+        const {diaryId} = req.params;
         const {userId} = res.locals;
         if(!reviewId || !userId){
             res.json(dataResponse(null, null, 403));
         }
         try {
-            await review.delete({
+            await diary.delete({
                 where: {
-                    review_id: reviewId,
+                    diary_id_id: diaryId,
                     user_id: userId
                 }
             })
@@ -93,4 +83,4 @@ class reviewController{
 }
 
 
-module.exports = reviewController;
+module.exports = diaryController;

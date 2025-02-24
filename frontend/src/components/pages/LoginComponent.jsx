@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function LoginComponent(){
+    
     const [formData, setFormData] = useState({});
 
     const navigate = useNavigate();
@@ -19,13 +20,16 @@ export default function LoginComponent(){
         e.preventDefault();
         const res = await fetch('http://localhost:8080/auth/login', {
             method: 'POST',
+            credentials:'include',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(formData)
         });
         const data = await res.json();
-        console.log(data);
+        if(data.status === 200){
+            navigate('/');
+        }
     }
     return(
         <>

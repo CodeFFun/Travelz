@@ -54,7 +54,8 @@ class authController {
       try{
         res.cookie('token', '', {
           httpOnly: true,
-          maxAge: 1
+          maxAge: 1,
+          origin: "http://localhost:5173",
       })
       res.json(dataResponse(null, 'User logged out successfully', 200));
       } catch(e) {

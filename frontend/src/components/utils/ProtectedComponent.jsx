@@ -6,6 +6,7 @@ const ProtectedRoute = () => {
 
   useEffect(() => {
     const verifyUser = async () => {
+
       try {
         const response = await fetch("http://localhost:8080/auth/cookie", {
           credentials: "include",
@@ -22,9 +23,11 @@ const ProtectedRoute = () => {
   }, []);
 
   if (isAuthenticated === null) return <p>Loading...</p>; // Show loading state
-  if (!isAuthenticated) return <Navigate to="/login" />; // Redirect if not authenticated
-
-  return <Outlet />; // Render child routes
+  if (!isAuthenticated){
+    return <Navigate to="/login" />; // Redirect if not authenticated
+  }else{
+    return <Outlet />; // Render child routes
+  }
 };
 
 export default ProtectedRoute;

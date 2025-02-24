@@ -5,9 +5,12 @@ const userRouter = express.Router();
 const user = new userController();
 
 
+userRouter.get('/role/:role', user.getUserByRole);
+
+userRouter.get('/', user.getUserProfile);
 userRouter.get('/:id', user.getUserById);
 
-userRouter.patch('/:id', user.updateUser);
+userRouter.patch('/', user.updateUser);
 
 userRouter.delete('/:id', user.deleteUser);
 

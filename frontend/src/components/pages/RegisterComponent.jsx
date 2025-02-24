@@ -20,6 +20,7 @@ export default function RegisterComponent() {
         e.preventDefault();
         const res = await fetch('http://localhost:8080/auth/register', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -27,6 +28,9 @@ export default function RegisterComponent() {
         });
         const data = await res.json();
         console.log(data);
+        if(data.status === 201) {
+            navigate('/login');
+        }
     }
     return (
         <>

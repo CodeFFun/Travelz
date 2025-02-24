@@ -9,9 +9,12 @@ authRouter.post('/register', auth.register)
 
 authRouter.post('/login', auth.login)
 authRouter.get('/logout', auth.logout)
-authRouter.get('/cookie', (_,res) => {
-    let token = res.cookie.token
-    res.json(dataResponse(token, 'Cookie fetched successfully', 200));
+authRouter.get('/cookie', (req,res) => {
+    let token = req.cookies.token
+    if(!token){
+        return res.json(dataResponse(null, 'No cookie found', 404));
+    }
+    return res.json(dataResponse(token, 'Cookie fetched successfully', 200));
 })
 
 
