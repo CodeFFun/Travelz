@@ -4,6 +4,15 @@ const {user} = require('../lib/client.js')
 const{generateCookie} = require('../lib/cookie.js');
 
 class userController{
+
+    checkRole = async(req, res) => {
+        const {id, role} = res.locals;
+        if(!id){
+            return res.json(dataResponse(null, 'Not enough credentials', 400));
+        }
+       res.json(dataResponse({role}, 'Role fetched successfully', 200));  
+    }
+
      createUser = async (req, res) => {
         let {email, password,role} = req.body;
         if(!email || !password, !role){

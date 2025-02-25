@@ -77,38 +77,38 @@ class bookingController{
 
     async updateBooking(req, res){
         const {bookingId} = req.params;
-        const {userId} = res.locals;
-        if(!bookingId || !userId){
+        console.log(bookingId)
+        const {id} = res.locals;
+        if(!bookingId || !id){
             return res.json(dataResponse(null, null, 403));
         }
         try {
-            await booking.update({
+            const newBooking = await booking.update({
                 data: req.body,
                 where: {
                     booking_id: bookingId,
-                    user_id: userId
                 }
             })
-            res.json(dataResponse(null, "Comment updated", 200));
+            res.json(dataResponse(newBooking, "Comment updated", 200));
         } catch (error) {
+            console.log(error.message)
             res.json(dataResponse(null, "Something went wrong", 500));
         }
     }
 
     async deleteBooking(req, res){
         const {bookingId} = req.params;
-        const {userId} = res.locals;
-        if(!reviewId || !userId){
+        const {id} = res.locals;
+        if(!bookingId || !id){
             res.json(dataResponse(null, null, 403));
         }
         try {
             await booking.delete({
                 where: {
                     booking_id: bookingId,
-                    user_id: userId
                 }
             })
-            res.json(dataResponse(null, "Comment deleted", 200));
+            res.json(dataResponse(null, "Event deleted", 200));
         } catch (error) {
             res.json(dataResponse(null, "Something went wrong", 500));
         }

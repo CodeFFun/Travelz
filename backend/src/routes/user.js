@@ -6,6 +6,7 @@ const user = new userController();
 
 
 userRouter.get('/role/:role', user.getUserByRole);
+userRouter.get('/role', user.checkRole);
 
 userRouter.get('/', user.getUserProfile);
 userRouter.get('/:id', user.getUserById);

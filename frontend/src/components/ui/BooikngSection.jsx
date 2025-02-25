@@ -1,33 +1,60 @@
+import { useState } from "react";
+import {useNavigate} from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 export default function BooikngSection() {
+  const navigate = useNavigate();
+  const [isGuide, setIsGuide] = useState(false)
+
   const getBooking = async () => {
     const res = await fetch("http://localhost:8080/booking", {
       method: "GET",
       credentials: "include",
     });
+  
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+  
     return await res.json();
   };
 
   const { data } = useQuery({
     queryKey: ["fetchBooking"],
     queryFn: getBooking,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
-  console.log(data?.data);
+  const getRole = async () => {
+    const res = await fetch("http://localhost:8080/user/role", {
+      method: "GET",
+      credentials: "include",
+    });
+    return await res.json()
+  };
 
-  const bookings = [
-    { name: "John Doe", address: "123 Main St, NY", date: "24 Feb 2025" },
-    { name: "Jane Smith", address: "456 Elm St, CA", date: "23 Feb 2025" },
-    { name: "Alice Brown", address: "789 Pine St, TX", date: "22 Feb 2025" },
-    { name: "Bob White", address: "321 Oak St, FL", date: "21 Feb 2025" },
-  ];
+  const role = useQuery({
+    queryKey: ["fetchRole"],
+    queryFn: getRole,
+  });
+
+  const checkRole = (role) => {
+    if (role === "GUIDE") {
+      setIsGuide(true);
+    }
+  };
+
+  checkRole(role.data?.data.role);
+
+  console.log(isGuide);
+
+
   return (
     <>
       <div className="p-6 bg-white rounded-2xl shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Bookings</h2>
-          <a href="#" className="text-blue-500 text-sm">
+          <a href="/calender" className="text-blue-500 text-sm">
             See more
           </a>
         </div>
@@ -41,12 +68,12 @@ export default function BooikngSection() {
                   : "border-green-500"
               }`}
             >
-              <div>
+              <div className="hover:cursor-pointer" onClick={() => navigate('/calender')}>
                 <h3 className="font-medium text-lg">
-                  {booking.guide.user_name}
+                  {isGuide ? booking.user.user_name : booking.guide.user_name}
                 </h3>
                 <p className="text-gray-500 text-sm">
-                  {booking.guide.user_email}
+                  {isGuide ? booking.user.user_email : booking.guide.user_email}
                 </p>
               </div>
               <p className="text-gray-500 text-sm">{booking.booking_date}</p>
