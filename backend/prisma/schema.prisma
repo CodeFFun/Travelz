@@ -51,10 +51,8 @@ model diary{
   diary_title  String?
   diary_desc   String?
   diary_date   String?
+  diary_location String?
   diary_image  String?
-  diary_mood   String?
-  diary_weather Weather?
-  diary_tags   String[] @default([])
 }
 
 model review {
@@ -68,15 +66,6 @@ model review {
   guide         user     @relation("GuideReviews", fields: [guide_id], references: [user_id])
 }
 
-
-enum Weather{
-  SUNNY
-  CLOUDY
-  RAINY
-  SNOWY
-  FOGGY
-  STORMY
-}
 
 enum Status{
   PENDING

@@ -1,8 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery} from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function BookingGrid() {
-  const queryClient = useQueryClient();
 
   const getBooking = async () => {
     const res = await fetch("http://localhost:8080/booking", {
@@ -22,21 +21,6 @@ export default function BookingGrid() {
   // State to track temporary date changes
   const [tempDates, setTempDates] = useState({});
 
-
-  // Delete booking mutation
-  const deleteBookingMutation = useMutation({
-    mutationFn: async (id) => {
-      const res = await fetch(`http://localhost:8080/booking/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      return await res.json();
-    },
-    onSuccess: () => {
-      // Invalidate and refetch bookings after successful deletion
-      queryClient.invalidateQueries(["fetchBooking"]);
-    },
-  });
 
   const handleEdit = (id) => {
     // Set this card to edit mode

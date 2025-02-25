@@ -6,6 +6,7 @@ import LoginComponent from "../pages/LoginComponent";
 import ShowProfile from "../pages/ShowProfile";
 import CalenderPage from "../pages/CalenderPage";
 import GuideProfile from "../pages/GuideProfile";
+import DiaryPage from "../pages/DiaryPage";
 
 export default function RouterComponent() {
   return (
@@ -18,6 +19,7 @@ export default function RouterComponent() {
             <Route path="/profile" element={<ShowProfile />} />
             <Route path="/:id/profile" element={<GuideProfile />} />
             <Route path="/calender" element={<CalenderPage />} />
+            <Route path="/diary" element={<DiaryPage />} />
           </Route>
 
           {/* Public Routes */}
