@@ -25,7 +25,7 @@ class authController {
                 }
             })
             if(!newUser){
-                return res.json(dataResponse(null, "Username or password doesnt match", 404));
+                return res.json(dataResponse(null, "No user exists", 404));
             }
             //compare the password
             if(!comparePassword(password, newUser.user_password)){

@@ -32,3 +32,5 @@ const url = process.env.URL || 'http://localhost';
 app.listen(port, () => {
     console.log(`Server is running on port ${url+port}`);
 })
+
+// module.exports = app;

@@ -5,8 +5,6 @@ import BooikngSection from "../ui/BooikngSection";
 import DiarySection from "../ui/DiarySection";
 
 export default function HomeComponent() {
-
-  
   return (
     <>
       <div className="h-screen w-screen overflow-hidden flex flex-col">

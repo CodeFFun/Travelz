@@ -1,10 +1,10 @@
 import { useState } from "react";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
-export default function BooikngSection() {
+export default function BookingSection() {
   const navigate = useNavigate();
-  const [isGuide, setIsGuide] = useState(false)
+  const [isGuide, setIsGuide] = useState(false);
 
   const getBooking = async () => {
     const res = await fetch("http://localhost:8080/booking", {
@@ -30,7 +30,7 @@ export default function BooikngSection() {
       method: "GET",
       credentials: "include",
     });
-    return await res.json()
+    return await res.json();
   };
 
   const role = useQuery({
@@ -43,11 +43,10 @@ export default function BooikngSection() {
       setIsGuide(true);
     }
   };
-
-  checkRole(role.data?.data.role);
-
-  console.log(isGuide);
-
+  
+  if (role.data?.data?.role) {
+    checkRole(role.data.data.role);
+  }
 
   return (
     <>
@@ -58,28 +57,36 @@ export default function BooikngSection() {
             See more
           </a>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {data?.data.map((booking, index) => (
-            <div
-              key={index}
-              className={`p-4 bg-gray-50 rounded-xl shadow-sm flex justify-between border-l-4 ${
-                booking.status === "PENDING"
-                  ? "border-yellow-500"
-                  : "border-green-500"
-              }`}
-            >
-              <div className="hover:cursor-pointer" onClick={() => navigate('/calender')}>
-                <h3 className="font-medium text-lg">
-                  {isGuide ? booking.user.user_name : booking.guide.user_name}
-                </h3>
-                <p className="text-gray-500 text-sm">
-                  {isGuide ? booking.user.user_email : booking.guide.user_email}
-                </p>
+        
+        {(!data?.data || data.data.length === 0) ? (
+          <div className="py-8 text-center">
+            <p className="text-gray-500 text-lg">No bookings yet</p>
+            <p className="text-gray-400 text-sm mt-2">Your upcoming bookings will appear here</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            {data.data.map((booking, index) => (
+              <div
+                key={index}
+                className={`p-4 bg-gray-50 rounded-xl shadow-sm flex justify-between border-l-4 ${
+                  booking.status === "PENDING"
+                    ? "border-yellow-500"
+                    : "border-green-500"
+                }`}
+              >
+                <div className="hover:cursor-pointer" onClick={() => navigate('/calender')}>
+                  <h3 className="font-medium text-lg">
+                    {isGuide ? booking.user.user_name : booking.guide.user_name}
+                  </h3>
+                  <p className="text-gray-500 text-sm">
+                    {isGuide ? booking.user.user_email : booking.guide.user_email}
+                  </p>
+                </div>
+                <p className="text-gray-500 text-sm">{booking.booking_date}</p>
               </div>
-              <p className="text-gray-500 text-sm">{booking.booking_date}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

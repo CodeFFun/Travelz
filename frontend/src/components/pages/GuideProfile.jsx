@@ -1,17 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Languages, DollarSign, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Building2 } from "lucide-react";
 import { Phone } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import NavbarComponent from "../ui/NavbarComponent";
 import SidebarComponent from "../ui/SidebarComponent";
 
 
 export default function GuideProfile() {
   const { id } = useParams();
+  const [hasName, setHasName] = useState("");
+  const [showBtn, setShowBtn] = useState(false);
 
   const [date, setDate] = useState("");
+
+  const getProfile = async () => {
+    const res = await fetch("http://localhost:8080/user",{
+      method:"GET",
+      credentials: "include"
+    })
+    return await res.json();
+  }
+
+
+  const profileData = useQuery({
+    queryKey:["fetchProfile"], 
+    queryFn: getProfile
+  })
+  
+  useEffect(() => {
+    if(profileData.data){
+      setHasName(profileData.data.data.user_name)
+    }
+    if(hasName !== ""){
+      setShowBtn(true)
+    }
+  }, [profileData.data, hasName])
+
 
   const onChange = (e) => {
     setDate(e.target.value);
@@ -28,7 +55,7 @@ export default function GuideProfile() {
     });
     const data =  await res.json();
     setDate("");
-    console.log(data);
+    toast(data.message);
   }
 
   const getGuideProfile = async () => {
@@ -184,12 +211,18 @@ export default function GuideProfile() {
                       <span className="text-sm text-gray-500">rating</span>
                     </div>
                   </div>
-                  <div
-                    className={`col-span-full flex gap-10 ${
-                      data?.data?.user_role === "USER" ? "hidden" : "block"
-                    }`}
-                  >
-                    <input
+                  
+                  {!showBtn && data?.data?.user_role === "GUIDE" && (
+                    <div className="col-span-full mt-4">
+                      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                        <p className="text-yellow-700">You need to complete your profile before booking a guide.</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {showBtn && data?.data?.user_role === "GUIDE" && (
+                    <div className="col-span-full flex gap-10">
+                      <input
                         type="date"
                         name="booking_date"
                         onChange={onChange}
@@ -197,12 +230,14 @@ export default function GuideProfile() {
                         className="w-full flex justify-center items-center px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                       <button
-                      disabled={date !== "" ? false : true}
+                        disabled={date !== "" ? false : true}
                         onClick={() => addBooking()}
                         className="w-full px-3 py-2 disabled:bg-purple-900 border rounded-md bg-purple-500 hover:bg-purple-700 hover:cursor-pointer text-white"
-                      > Book Now
-                        </button>
-                  </div>
+                      > 
+                        Book Now
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
