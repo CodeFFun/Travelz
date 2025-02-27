@@ -48,6 +48,7 @@ function DiaryComponent() {
         credentials: "include",
       });
       console.log(await res.json());
+      window.location.reload();
       
     }
   };

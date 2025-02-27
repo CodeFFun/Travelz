@@ -1,5 +1,6 @@
 import { useQuery} from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function BookingGrid() {
 
@@ -65,7 +66,9 @@ export default function BookingGrid() {
         },
         body: JSON.stringify({ booking_date: tempDates[id] }),
       });
-      console.log(await res.json());
+      const data = await res.json()
+      window.location.reload()
+      toast.success(data.message)
   };
 
   const handleDelete = async (id) => {
@@ -77,7 +80,9 @@ export default function BookingGrid() {
           "Content-Type": "application/json",
         },
       });
-      console.log(await res.json());
+      const data = await res.json()
+      window.location.reload()
+      toast.warning(data.message)
   };
 
   if (!data?.data) {
