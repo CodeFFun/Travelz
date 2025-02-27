@@ -1,33 +1,60 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Languages, DollarSign, Star } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { Building2 } from 'lucide-react';
-import { Phone } from 'lucide-react';
+import { MapPin, Languages, DollarSign, Star, Building2, Phone } from 'lucide-react';
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function ProfileComponent() {
+function ProfileComponent() {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({});
+  const [profileData, setProfileData] = useState({
+    user_role: "USER", // Default role
+    user_name: "",
+    user_email: "",
+    user_phone: "",
+    user_address: "",
+    user_language: "",
+    user_tourlocation: "",
+    user_rate: "",
+    user_rating: 0
+  });
+  
+  // Keep track of the current role from the database
+  const [currentRole, setCurrentRole] = useState("USER");
 
   const getProfile = async () => {
-    const res = await fetch("http://localhost:8080/user", {
-      method: "GET",
-      credentials: "include"
-    });
-    return await res.json();
+    try {
+      const res = await fetch("http://localhost:8080/user", {
+        method: "GET",
+        credentials: "include"
+      });
+      return await res.json();
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      return { data: null };
+    }
   };
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["fetchProfile"],
-    queryFn: getProfile,
-  });
-
-  // Initialize profileData with API data when it loads
-  useEffect(() => {
-    if (data?.data) {
-      setProfileData(data.data);
+  // Simulate useQuery behavior
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const result = await getProfile();
+      if (result?.data) {
+        setProfileData(result.data);
+        // Set the current role from the database
+        setCurrentRole(result.data.user_role || "USER");
+      }
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [data]);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -35,6 +62,15 @@ export default function ProfileComponent() {
     setProfileData(prevData => ({
       ...prevData,
       [name]: value
+    }));
+    
+    setIsEditing(true);
+  };
+
+  const handleRoleToggle = (role) => {
+    setProfileData(prevData => ({
+      ...prevData,
+      user_role: role
     }));
     
     setIsEditing(true);
@@ -55,7 +91,7 @@ export default function ProfileComponent() {
       
       if (res.ok) {
         toast.success(responseData.message || "Profile updated successfully");
-        refetch(); // Refresh the data after update
+        fetchData(); // Refresh the data after update
       } else {
         toast.error(responseData.message || "Failed to update profile");
       }
@@ -106,6 +142,35 @@ export default function ProfileComponent() {
             />
           </div>
 
+          {/* Role Toggle */}
+          <div className="mb-6">
+            <label className="block text-sm text-gray-500 mb-2">I am a:</label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => handleRoleToggle("USER")}
+                className={`px-4 py-2 rounded-md ${
+                  profileData?.user_role === "USER"
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Traveler
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRoleToggle("GUIDE")}
+                className={`px-4 py-2 rounded-md ${
+                  profileData?.user_role === "GUIDE"
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Guide
+              </button>
+            </div>
+          </div>
+
           {/* Profile Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="flex items-start gap-3">
@@ -153,43 +218,47 @@ export default function ProfileComponent() {
               </div>
             </div>
 
-            <div className={`flex items-start gap-3 ${profileData?.user_role === "USER" ? "hidden" : "block"}`}>
-              <Building2 className="w-5 h-5 text-gray-400 mt-2 flex-shrink-0" />
-              <div className="flex-1">
-                <label className="block text-sm text-gray-500 mb-1">Tour Location:</label>
-                <input
-                  type="text"
-                  placeholder='Kathmandu, Nepal'
-                  name="user_tourlocation"
-                  value={profileData?.user_tourlocation || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            </div>
+            {currentRole === "GUIDE" && (
+              <>
+                <div className="flex items-start gap-3">
+                  <Building2 className="w-5 h-5 text-gray-400 mt-2 flex-shrink-0" />
+                  <div className="flex-1">
+                    <label className="block text-sm text-gray-500 mb-1">Tour Location:</label>
+                    <input
+                      type="text"
+                      placeholder='Kathmandu, Nepal'
+                      name="user_tourlocation"
+                      value={profileData?.user_tourlocation || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
 
-            <div className={`flex items-start gap-3 ${profileData?.user_role === "USER" ? "hidden" : "block"}`}>
-              <DollarSign className="w-5 h-5 text-gray-400 mt-2 flex-shrink-0" />
-              <div className="flex-1">
-                <label className="block text-sm text-gray-500 mb-1">Hourly Rate:</label>
-                <input
-                  type="number"
-                  name="user_rate"
-                  placeholder='75'
-                  value={profileData?.user_rate || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            </div>
+                <div className="flex items-start gap-3">
+                  <DollarSign className="w-5 h-5 text-gray-400 mt-2 flex-shrink-0" />
+                  <div className="flex-1">
+                    <label className="block text-sm text-gray-500 mb-1">Hourly Rate:</label>
+                    <input
+                      type="number"
+                      name="user_rate"
+                      placeholder='75'
+                      value={profileData?.user_rate || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
 
-            <div className={`col-span-full mt-2 ${profileData?.user_role === "USER" ? "hidden" : "block"}`}>
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-yellow-400" />
-                <span className="text-lg font-medium">{profileData?.user_rating || 0}</span>
-                <span className="text-sm text-gray-500">rating</span>
-              </div>
-            </div>
+                <div className="col-span-full mt-2">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-400" />
+                    <span className="text-lg font-medium">{profileData?.user_rating || 0}</span>
+                    <span className="text-sm text-gray-500">rating</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {isEditing && (
@@ -207,3 +276,5 @@ export default function ProfileComponent() {
     </div>
   );
 }
+
+export default ProfileComponent;
