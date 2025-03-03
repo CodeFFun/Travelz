@@ -60,6 +60,7 @@ export default function GuideProfile() {
       toast(data.message);
     } catch (error) {
       toast.error("Failed to create booking. Please try again.");
+      console.log(error)
     }
   };
 

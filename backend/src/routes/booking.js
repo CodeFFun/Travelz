@@ -19,7 +19,7 @@ bookingRouter.post('/:guideId',booking.bookingExists, booking.createBooking)
 //pass booking as id
 bookingRouter.patch('/:bookingId', booking.updateBooking)
 
-//pass bookingId as id
+//pass bookingId as id to get the booking
 bookingRouter.delete('/:bookingId', booking.deleteBooking)
 
 module.exports = bookingRouter;
